@@ -1,0 +1,26 @@
+#!/hint/bash
+# shellcheck disable=SC2034,SC2154,SC2164
+
+# Maintainer: XesaCat <izzie@xesacat.xyz>
+
+pkgname=iana-etc
+pkgver=20230418
+pkgrel=1
+arch=("any")
+pkgdesc="/etc/protocols and /etc/services provided by IANA"
+url="https://www.iana.org/protocols"
+license=("custom:none")
+backup=("etc/"{protocols,services})
+sources=("https://github.com/Mic92/iana-etc/releases/download/{pkgver}/iana-etc-${pkgver}.tar.gz")
+sha256sums=("df1cf52ada2ae70effb1d4efcc1b6ca54044b09dff231f234dc9fa6a9c1b5199")
+
+package() {
+	cd "${srcdir}"
+
+	install -d "${pkgdir}/etc"
+	install -Dm644 LICENSE "${pkgdir}/usr/share/licenses/iana-etc/LICENSE"
+	install -Dm644 protocol-numbers.xml "${pkgdir}/usr/share/iana-etc/protocol-numbers.iana"
+	install -Dm644 protocols "${pkgdir}/etc/protocols"
+	install -Dm644 service-names-port-numbers.xml "${pkgdir}/usr/share/iana-etc/port-numbers.iana"
+	install -Dm644 services "${pkgdir}/etc/services"
+}
