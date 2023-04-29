@@ -1,0 +1,62 @@
+#!/hint/bash
+# shellcheck disable=SC2034,SC2154,SC2164
+
+# Maintainer: blek <me@blek.codes>
+
+pkgname=ncurses
+pkgver=6.4
+pkgrel=1
+pkgdesc='System V Release 4.0 curses library'
+arch=(x86_64)
+license=(MIT)
+depends=(glibc gcc-libs)
+makedepends=(autoconf-archive)
+optdepends=('bash: for ncursew6-config')
+provides=(libncurses++w.so libformw.so libmenuw.so libpanelw.so libncursew.so)
+replace=(alacritty-terminfo)
+source=(
+	https://invisible-mirror.net/archives/$pkgname/$pkgname-$pkgver.tar.gz{,.asc}
+)
+sha256sums=('6931283d9ac87c5073f30b6290c4c75f21632bb4fc3603ac8100812bed248159' 'SKIP')
+validpgpkeys=('19882D92DDA4C400C22C0D56CC2AF4472167BE03')
+
+build() {
+	local configure_options=(
+		--prefix=/usr
+		--enable-widec
+		--enable-pc-files
+		--with-cxx-binding
+		--with-cxx-shared
+		--with-pkg-config-libdir=/usr/lib/pkgconfig
+		--with-shared
+		--with-versioned-syms
+		--with-xterm-kbs=del
+		--without-ada
+		--mandir=/usr/share/man
+	)
+
+	cd "$pkgname-$pkgver"
+	./configure "${configure_options[$@]}"
+	make
+}
+
+package() {
+	make DESTDIR="$pkgdir" install -C "$pkgname-$pkgver"
+	install -vDm 644 "$pkgname-$pkgver/COPYING" -t "$pkgdir/usr/share/licenses/$pkgname/"
+	mkdir "${pkgdir}/usr/lib/pkgconfig"
+
+	for lib in ncurses ncurses++ form panel menu; do
+		printf 'INPUT(-l%sw)\n' "${lib}" > "${pkgdir}/usr/lib/${lib}.so"
+		ln -sv "${lib}w.pc" "${pkgdir}/usr/lib/pkgconfig/${lib}.pc"
+	done
+
+	printf 'INPUT(-lncursesw)\n' > "${pkgdir}/usr/lib/libcursesw.so"
+	ln -sv libncurses.so "${pkgdir}/usr/lib/libcurses.so"
+
+	for lib in tic tinfo; do
+		printf 'INPUT(libncursesw.so.%s)\n' "${pkgver:0:1}" > "${pkgdir}/usr/lib/lib${lib}.so"
+		ln -sv "libncursesw.so.${pkgver:0:1}" "${pkgdir}/usr/lib/lib${lib}.so.${pkgver:0:1}"
+		ln -sv ncursesw.pc "${pkgdir}/usr/lib/pkgconfig/${lib}.pc"
+	done
+}
+
