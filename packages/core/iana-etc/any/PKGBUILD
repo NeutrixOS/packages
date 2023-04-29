@@ -11,14 +11,21 @@ pkgdesc="/etc/protocols and /etc/services provided by IANA"
 url="https://www.iana.org/protocols"
 license=("custom:none")
 backup=("etc/"{protocols,services})
-sources=("https://github.com/Mic92/iana-etc/releases/download/{pkgver}/iana-etc-${pkgver}.tar.gz")
-sha256sums=("df1cf52ada2ae70effb1d4efcc1b6ca54044b09dff231f234dc9fa6a9c1b5199")
+source=(
+	"https://github.com/Mic92/iana-etc/releases/download/${pkgver}/iana-etc-${pkgver}.tar.gz"
+	"LICENSE"
+)
+sha256sums=(
+	"df1cf52ada2ae70effb1d4efcc1b6ca54044b09dff231f234dc9fa6a9c1b5199"
+	"dd37e92942d5a4024f1c77df49d61ca77fc6284691814903a741785df61f78cb"
+)
 
 package() {
 	cd "${srcdir}"
-
 	install -d "${pkgdir}/etc"
 	install -Dm644 LICENSE "${pkgdir}/usr/share/licenses/iana-etc/LICENSE"
+
+	cd "${srcdir}/iana-etc-${pkgver}"
 	install -Dm644 protocol-numbers.xml "${pkgdir}/usr/share/iana-etc/protocol-numbers.iana"
 	install -Dm644 protocols "${pkgdir}/etc/protocols"
 	install -Dm644 service-names-port-numbers.xml "${pkgdir}/usr/share/iana-etc/port-numbers.iana"
