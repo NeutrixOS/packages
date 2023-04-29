@@ -1,0 +1,37 @@
+#!/hint/bash
+# shellcheck disable=SC2034,SC2154,SC2164
+
+# Maintainer: XesaCat <izzie@xesacat.xyz>
+
+pkgname=neutrix-keyring
+pkgver=20230429
+pkgrel=1
+arch=("any")
+pkgdesc="Neutrix PGP keyring"
+url="https://git.celenon.xyz/Neutrix/packages/core/neutrix-keyring/any"
+license=("MIT")
+makedepends=("gnupg")
+depends=("pacman")
+install=neutrix-keyring.install
+
+build() {
+    cd "${srcdir}"
+
+    ids=(
+        "1B421DEBACFFA556EE28D8ABDAB38412691596DD" # Build <build@xesacat.xyz>
+        "4515F50492954AFF325F759C18A1380ED4E7FC0D" # XesaCat <izzie@xesacat.xyz>
+        "59F46DB850CA447F36371DED14546221E3595D0C" # blek! <me@blek.codes>
+    )
+
+    gpg --armor --output neutrix-keyring.gpg --export "${ids[@]}"
+    for id in "${ids[@]}"; do
+        echo "$id:4:" >>neutrix-keyring-trusted
+    done
+}
+
+package() {
+    cd "${srcdir}"
+
+    install -Dm644 neutrix-keyring.gpg "${pkgdir}/usr/share/pacman/keyrings/neutrix-keyring.gpg"
+    install -Dm644 neutrix-keyring-trusted "${pkgdir}/usr/share/pacman/keyrings/neutrix-keyring-trusted"
+}
