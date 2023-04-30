@@ -16,6 +16,9 @@ msg() {
 section() {
 	echo -e "\033[1;91m => \033[2;36m$*\033[0m"
 }
+errcho() {
+	echo $* >&2
+}
 
 REPOS=('core' 'extra')
 REPO_PATHS=()
@@ -25,6 +28,17 @@ for repo in "${REPOS[@]}"; do
 done
 
 PKGBUILDS=()
+
+if [[ `git status --porcelain` ]]; then
+	errcho "Warning: You have changes in the git repository."
+	errcho -n "Are you sure that you want to build all packages? (Y/n): "
+	read confirm
+	if [[ $confirm == [nN] || $confirm == [nN][oO] ]]; then
+		exit 0
+	fi
+fi
+echo a
+exit 1
 
 for path in "${REPO_PATHS[@]}"; do
 	PKGBUILDS+=($(find "$path" -type f -name PKGBUILD))
